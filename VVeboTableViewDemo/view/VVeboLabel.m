@@ -107,7 +107,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
 }
 
 //Fix Coretext height
-- (void)setFrame:(CGRect)frame{
+- (void)setFrame:(CGRect)frame {
     if (!CGSizeEqualToSize(labelImageView.image.size, frame.size)) {
         labelImageView.image = nil;
         highlightImageView.image = nil;
@@ -118,7 +118,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
 }
 
 //高亮处理
-- (NSMutableAttributedString *)highlightText:(NSMutableAttributedString *)coloredString{
+- (NSMutableAttributedString *)highlightText:(NSMutableAttributedString *)coloredString {
     //Create a mutable attribute string to set the highlighting
     NSString* string = coloredString.string;
     NSRange range = NSMakeRange(0,[string length]);
@@ -132,16 +132,24 @@ static inline NSRegularExpression * TopicRegularExpression() {
     for(NSString* key in definition) {
         NSString* expression = [definition objectForKey:key];
         NSArray* matches = [[NSRegularExpression regularExpressionWithPattern:expression options:NSRegularExpressionDotMatchesLineSeparators error:nil] matchesInString:string options:0 range:range];
+        
+        // 遍历搜索到的结果，判断点击位置在不在搜索到的结果数组内，是的话就高亮
         for(NSTextCheckingResult* match in matches) {
             UIColor* textColor = nil;
             //Get the text color, if it is a custom key and no color was defined, choose black
             if(!highlightColors||!(textColor=([highlightColors objectForKey:key])))
                 textColor = self.textColor;
             
-            
-            if (labelImageView.image != nil && currentRange.location!=-1 && currentRange.location>=match.range.location && currentRange.length+currentRange.location<=match.range.length+match.range.location) {
+            // 点击到的位置高亮显示
+            // 判断条件是：点击位置要在元素内，即大于等于元素的location，小于等于元素的长度
+            if (labelImageView.image != nil
+                && currentRange.location != -1
+                && currentRange.location >= match.range.location
+                && currentRange.length+currentRange.location <= match.range.length+match.range.location) {
+                
                 [coloredString addAttribute:(NSString*)kCTForegroundColorAttributeName
-                                      value:(id)[UIColor colorWithRed:224/255.0 green:44/255.0 blue:86/255.0 alpha:1].CGColor range:match.range];
+                                      value:(id)[UIColor colorWithRed:224/255.0 green:44/255.0 blue:86/255.0 alpha:1].CGColor
+                                      range:match.range];
                 double delayInSeconds = 1.5;
                 dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
                 dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
@@ -157,24 +165,27 @@ static inline NSRegularExpression * TopicRegularExpression() {
 }
 
 //使用coretext将文本绘制到图片。
-- (void)setText:(NSString *)text{
-    if (text==nil || text.length<=0) {
+- (void)setText:(NSString *)text {
+    if (text == nil || text.length <= 0) {
         labelImageView.image = nil;
         highlightImageView.image = nil;
         return;
     }
     if ([text isEqualToString:_text]) {
-        if (!highlighting || currentRange.location==-1) {
+        if (!highlighting || currentRange.location == -1) {
             return;
         }
     }
-    if (highlighting&&labelImageView.image==nil) {
+    if (highlighting && labelImageView.image == nil) {
         return;
     }
+    
+    // 未高亮状态下重置设置
     if (!highlighting) {
         [framesDict removeAllObjects];
         currentRange = NSMakeRange(-1, -1);
     }
+#warning mark - 看到此处
     NSInteger flag = drawFlag;
     BOOL isHighlight = highlighting;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -362,7 +373,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
             CGContextSetTextPosition(c, penOffset, y);
             CTLineDraw(line, c);
         }
-        if ((!highlighting&&self.superview!=nil)) {
+        if ((!highlighting && self.superview != nil)) {
             CFArrayRef runs = CTLineGetGlyphRuns(line);
             for (int j = 0; j < CFArrayGetCount(runs); j++) {
                 CGFloat runAscent;
@@ -388,7 +399,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
     CFRelease(path);
 }
 
-- (void)clear{
+- (void)clear {
     drawFlag = arc4random();
     _text = @"";
     labelImageView.image = nil;
@@ -396,7 +407,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
     [self removeSubviewExceptTag:NSIntegerMin];
 }
 
-- (void)removeSubviewExceptTag:(NSInteger)tag{
+- (void)removeSubviewExceptTag:(NSInteger)tag {
     for (UIView *temp in self.subviews) {
         if (temp.tag!=tag) {
             if ([temp isKindOfClass:[UIImageView class]]) {
@@ -415,12 +426,12 @@ static inline NSRegularExpression * TopicRegularExpression() {
     }
 }
 
-- (void)highlightWord{
+- (void)highlightWord {
     highlighting = YES;
     [self setText:_text];
 }
 
-- (void)backToNormal{
+- (void)backToNormal {
     if (!highlighting) {
         return;
     }
@@ -429,20 +440,20 @@ static inline NSRegularExpression * TopicRegularExpression() {
     highlightImageView.image = nil;
 }
 
-- (BOOL)touchPoint:(CGPoint)point{
+- (BOOL)touchPoint:(CGPoint)point {
     for (NSString *key in framesDict.allKeys) {
         CGRect frame = [[framesDict valueForKey:key] CGRectValue];
         if (CGRectContainsPoint(frame, point)) {
             NSRange range = NSRangeFromString(key);
             NSArray* matches = [AccountRegularExpression() matchesInString:self.text options:0 range:NSMakeRange(0, self.text.length)];
             for(NSTextCheckingResult* match in matches) {
-                if (range.location!=-1 && range.location>=match.range.location && range.length+range.location<=match.range.length+match.range.location) {
+                if (range.location != -1 && range.location >= match.range.location && range.length + range.location <= match.range.length+match.range.location) {
                     return YES;
                 }
             }
             matches = [TopicRegularExpression() matchesInString:self.text options:0 range:NSMakeRange(0, self.text.length)];
             for(NSTextCheckingResult* match in matches) {
-                if (range.location!=-1 && range.location>=match.range.location && range.length+range.location<=match.range.length+match.range.location) {
+                if (range.location != -1 && range.location >= match.range.location && range.length + range.location <= match.range.length + match.range.location) {
                     return YES;
                 }
             }
@@ -451,7 +462,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
     return NO;
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     CGPoint location = [[touches anyObject] locationInView:self];
     for (NSString *key in framesDict.allKeys) {
         CGRect frame = [[framesDict valueForKey:key] CGRectValue];
@@ -464,7 +475,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
     }
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (highlighting) {
         double delayInSeconds = .2;
@@ -475,14 +486,14 @@ static inline NSRegularExpression * TopicRegularExpression() {
     }
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event{
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (highlighting) {
         [self backToNormal];
     }
 }
 
-- (void)removeFromSuperview{
+- (void)removeFromSuperview {
     [highlightColors removeAllObjects];
     highlightColors = nil;
     [framesDict removeAllObjects];
@@ -492,7 +503,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
     [super removeFromSuperview];
 }
 
-- (void)dealloc{
+- (void)dealloc {
     NSLog(@"dealloc %@", self);
 }
 

@@ -127,11 +127,13 @@
         CGContextRef context = UIGraphicsGetCurrentContext();
         [[UIColor colorWithRed:250/255.0 green:250/255.0 blue:250/255.0 alpha:1] set];
         CGContextFillRect(context, rect);
+        
         if ([_data valueForKey:@"subData"]) {
             [[UIColor colorWithRed:243/255.0 green:243/255.0 blue:243/255.0 alpha:1] set];
             CGRect subFrame = [_data[@"subData"][@"frame"] CGRectValue];
             CGContextFillRect(context, subFrame);
             [[UIColor colorWithRed:200/255.0 green:200/255.0 blue:200/255.0 alpha:1] set];
+            // TODO: frame为什么要这样设置？？？
             CGContextFillRect(context, CGRectMake(0, subFrame.origin.y, rect.size.width, .5));
         }
         

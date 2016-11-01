@@ -36,7 +36,7 @@
     return self;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return datas.count;
 }
 
@@ -49,7 +49,7 @@
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     [cell clear];
     cell.data = data;
-    if (needLoadArr.count>0&&[needLoadArr indexOfObject:indexPath]==NSNotFound) {
+    if (needLoadArr.count>0 && [needLoadArr indexOfObject:indexPath]==NSNotFound) {
         [cell clear];
         return;
     }
