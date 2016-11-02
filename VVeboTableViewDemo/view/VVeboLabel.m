@@ -186,6 +186,7 @@ static inline NSRegularExpression * TopicRegularExpression() {
         currentRange = NSMakeRange(-1, -1);
     }
 #warning mark - 看到此处
+    
     NSInteger flag = drawFlag;
     BOOL isHighlight = highlighting;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -195,34 +196,36 @@ static inline NSRegularExpression * TopicRegularExpression() {
         size.height += 10;
         UIGraphicsBeginImageContextWithOptions(size, ![self.backgroundColor isEqual:[UIColor clearColor]], 0);
         CGContextRef context = UIGraphicsGetCurrentContext();
-        if (context==NULL) {
+        if (context == NULL) {
             return;
         }
         if (![self.backgroundColor isEqual:[UIColor clearColor]]) {
             [self.backgroundColor set];
             CGContextFillRect(context, CGRectMake(0, 0, size.width, size.height));
         }
-        CGContextSetTextMatrix(context,CGAffineTransformIdentity);
-        CGContextTranslateCTM(context,0,size.height);
-        CGContextScaleCTM(context,1.0,-1.0);
+        CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+        CGContextTranslateCTM(context, 0, size.height);
+        CGContextScaleCTM(context, 1.0, -1.0);
         
         //Determine default text color
-        UIColor* textColor = self.textColor;
+        UIColor *textColor = self.textColor;
         
         //Set line height, font, color and break mode
-        CGFloat minimumLineHeight = self.font.pointSize,maximumLineHeight = minimumLineHeight, linespace = self.lineSpace;
-        CTFontRef font = CTFontCreateWithName((__bridge CFStringRef)self.font.fontName, self.font.pointSize,NULL);
+        CGFloat minimumLineHeight = self.font.pointSize,
+        maximumLineHeight = minimumLineHeight,
+        linespace = self.lineSpace;
+        CTFontRef font = CTFontCreateWithName((__bridge CFStringRef)self.font.fontName, self.font.pointSize, NULL);
         CTLineBreakMode lineBreakMode = kCTLineBreakByWordWrapping;
         CTTextAlignment alignment = CTTextAlignmentFromUITextAlignment(self.textAlignment);
         //Apply paragraph settings
         CTParagraphStyleRef style = CTParagraphStyleCreate((CTParagraphStyleSetting[6]){
             {kCTParagraphStyleSpecifierAlignment, sizeof(alignment), &alignment},
-            {kCTParagraphStyleSpecifierMinimumLineHeight,sizeof(minimumLineHeight),&minimumLineHeight},
-            {kCTParagraphStyleSpecifierMaximumLineHeight,sizeof(maximumLineHeight),&maximumLineHeight},
+            {kCTParagraphStyleSpecifierMinimumLineHeight, sizeof(minimumLineHeight), &minimumLineHeight},
+            {kCTParagraphStyleSpecifierMaximumLineHeight, sizeof(maximumLineHeight), &maximumLineHeight},
             {kCTParagraphStyleSpecifierMaximumLineSpacing, sizeof(linespace), &linespace},
             {kCTParagraphStyleSpecifierMinimumLineSpacing, sizeof(linespace), &linespace},
-            {kCTParagraphStyleSpecifierLineBreakMode,sizeof(CTLineBreakMode),&lineBreakMode}
-        },6);
+            {kCTParagraphStyleSpecifierLineBreakMode, sizeof(CTLineBreakMode), &lineBreakMode}
+        }, 6);
         
         NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:(__bridge id)font,(NSString*)kCTFontAttributeName,
                                     textColor.CGColor,kCTForegroundColorAttributeName,
